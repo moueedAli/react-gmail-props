@@ -2,6 +2,7 @@ import { useState } from 'react'
 import initialEmails from './data/emails'
 import './styles/App.css'
 import Emails from './components/Emails'
+import EmailView from './components/EmailView'
 
 const getReadEmails = emails => emails.filter(email => !email.read)
 
@@ -11,6 +12,7 @@ function App() {
   const [emails, setEmails] = useState(initialEmails)
   const [hideRead, setHideRead] = useState(false)
   const [currentTab, setCurrentTab] = useState('inbox')
+  const [currentEmail, setCurrentEmail] = useState(null)
 
   const unreadEmails = emails.filter(email => !email.read)
   const starredEmails = emails.filter(email => email.starred)
@@ -40,6 +42,14 @@ function App() {
   if (currentTab === 'starred')
     filteredEmails = getStarredEmails(filteredEmails)
 
+  const showEmail = (email) => {
+    setCurrentEmail(email)
+  }
+
+  const goBack = () => {
+    setCurrentEmail(null)
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -61,15 +71,17 @@ function App() {
       <nav className="left-menu">
         <ul className="inbox-list">
           <li
-            className={`item ${currentTab === 'inbox' ? 'active' : ''}`}
-            onClick={() => setCurrentTab('inbox')}
+            className={`item ${currentTab === 'inbox' ? 'active' : ''}`}        
+            onClick={() => {setCurrentTab('inbox')
+            setCurrentEmail(null)}} 
           >
             <span className="label">Inbox</span>
             <span className="count">{unreadEmails.length}</span>
           </li>
           <li
             className={`item ${currentTab === 'starred' ? 'active' : ''}`}
-            onClick={() => setCurrentTab('starred')}
+            onClick={() => {setCurrentTab('starred')
+            setCurrentEmail(null)}} 
           >
             <span className="label">Starred</span>
             <span className="count">{starredEmails.length}</span>
@@ -86,7 +98,12 @@ function App() {
           </li>
         </ul>
       </nav>
-      <Emails filteredEmails={filteredEmails} toggleRead={toggleRead} toggleStar={toggleStar} />
+      <main className="emails">
+        {currentEmail ? (
+        <EmailView email={currentEmail} goBack={goBack}/>
+        ) : (
+        <Emails filteredEmails={filteredEmails} toggleRead={toggleRead} toggleStar={toggleStar} showEmail={showEmail} />)}
+      </main>
     </div>
   )
 }
